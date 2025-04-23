@@ -32,9 +32,16 @@ class CleanInput(Runnable):
         threshold = input.get("threshold")
         print('Getting the clean input')
 
-        if file and file.filename.endswith(".pdf"):
+        if file:
+          if file.filename.endswith(".pdf"):
             with pdfplumber.open(file.file) as pdf:
-                extracted_text = "\n".join([page.extract_text() or "" for page in pdf.pages])
+              extracted_text = "\n".join([page.extract_text() or "" for page in pdf.pages])
+          elif file.filename.endswith(".md"):
+            try:
+              markdown_text = file.file.read().decode("utf-8")
+              extracted_text = markdown_text
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error processing Markdown: {e}")
         elif text:
             extracted_text = text
         else:

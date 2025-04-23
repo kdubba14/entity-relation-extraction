@@ -45,11 +45,12 @@ Use `multipart/form-data`
 
 ### Example `form-data` Fields:
 
-| Key                   | Type  | Example Value                    |
-| --------------------- | ----- | -------------------------------- |
-| `file`                | File  | (Upload a `.txt` or `.pdf` file) |
-| `configured_entities` | JSON  | `["PERSON", "ORG", "PRODUCT"]`   |
-| `threshold`           | Float | `0.65`                           |
+| Key                   | Type   | Example Value                    |
+| --------------------- | ------ | -------------------------------- |
+| `file`                | File   | (Upload a `.txt` or `.pdf` file) |
+| `text`                | String | `"text goes here for extract"`   |
+| `configured_entities` | JSON   | `["PERSON", "ORG", "PRODUCT"]`   |
+| `threshold`           | Float  | `0.65`                           |
 
 You can test this using [Hoppscotch](https://hoppscotch.io) or [Postman](https://www.postman.com).
 
