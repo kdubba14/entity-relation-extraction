@@ -1,0 +1,10 @@
+version: "3"
+services:
+  api:
+    build: .
+    image: er_extractor
+    ports:
+      - "8000:8000"
+      - 8080:80
+    volumes:
+      - .:/er_extractor:ro
