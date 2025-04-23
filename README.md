@@ -1,54 +1,109 @@
-# 👀 Scouta
+# 🧠 Entity & Relationship Extraction API
 
-## 📌 Project Overview
+This project exposes an NLP pipeline via a FastAPI server that extracts entities and relationships from text using a hybrid architecture of `spaCy`, `LangChain`, and `pydantic-ai`. Relationship visualizations are available in Neo4j.
 
-This is a **FastAPI** project designed to handle the AI tasks for **Scouta**. The project uses **Poetry** for dependency management and is deployable on **Railway**.
+---
 
-## 🚀 Setup & Run Locally
+## 🚀 Project Setup
 
-### 1️⃣ Install Dependencies
+This project uses [Poetry](https://python-poetry.org/) for dependency and environment management.
 
-- Install Python using `pyenv`
-- Install dependencies using `poetry`
+### 1. Clone and Setup Environment
 
-```sh
-pyenv install 3.9.21
-pyenv local 3.9.21
+```bash
+git clone https://github.com/kdubba14/entity-relationship-api.git
+cd entity-relationship-api
+
+# Initialize poetry environment
 poetry install
+
+# Activate environment
+poetry shell
 ```
 
-### 2️⃣ Run Locally
+### 2. Start FastAPI Server
 
-```sh
-poetry run uvicorn app.main:app --reload
+```bash
+poetry run uvicorn app.main:app --reload --port 8000
 ```
 
-Visit: `http://127.0.0.1:8000`
+---
 
-### 3️⃣ Run with Docker
+## 🔪 How to Test the API
 
-```sh
-docker build -t fastapi-boilerplate .
-docker run -p 8000:8000 fastapi-boilerplate
+**Base URL:** `http://localhost:8000/`
+
+### Endpoint to Use
+
+```
+POST /extract
 ```
 
-## 🚀 Deploy on Railway
+### Content Type
 
-### 1️⃣ Install Railway CLI
+Use `multipart/form-data`
 
-```sh
-npm i -g @railway/cli
-railway login
+### Example `form-data` Fields:
+
+| Key                   | Type  | Example Value                    |
+| --------------------- | ----- | -------------------------------- |
+| `file`                | File  | (Upload a `.txt` or `.pdf` file) |
+| `configured_entities` | JSON  | `["PERSON", "ORG", "PRODUCT"]`   |
+| `threshold`           | Float | `0.65`                           |
+
+You can test this using [Hoppscotch](https://hoppscotch.io) or [Postman](https://www.postman.com).
+
+---
+
+## 🔸 Where to See Data in Neo4j
+
+Once the API extracts relationships, they are pushed to your local or cloud-hosted Neo4j instance.
+
+### Neo4j URL:
+
+```
+https://console-preview.neo4j.io/tools/explore
 ```
 
-### 2️⃣ Deploy
+### Default Credentials (update if needed):
 
-```sh
-railway init
-railway up
+```
+Username: neo4j
+Password: password
 ```
 
-## 📘 API Routes
+You can use [Neo4j Bloom](https://neo4j.com/bloom/) or Neo4j Desktop to visualize entities and relationships.
 
-- `GET /` - Check if API is running
-- `GET /health` - Health check
+---
+
+## ⚙️ Architecture Overview
+
+| Component       | Role                                                              |
+| --------------- | ----------------------------------------------------------------- |
+| **FastAPI**     | Serves the API endpoints                                          |
+| **spaCy**       | Performs Named Entity Recognition with configurable EntityRuler   |
+| **LangChain**   | Provides fallback LLM logic for complex or missed relationships   |
+| **pydantic-ai** | Ensures structured I/O and validation of model responses          |
+| **Neo4j**       | Graph database for storing and visualizing entities/relationships |
+
+---
+
+## 🔧 Optimizations & Future Enhancements
+
+### Current Optimizations:
+
+- 🧍‍♂️ **Fallback LLM Only When Needed**  
+  Default to spaCy’s lightweight NER and relationship rules. Only invoke LangChain when spaCy misses or confidence is low.
+
+- ⚡ **Use of pydantic-ai**  
+  Validates responses from LLMs to avoid malformed or hallucinated outputs.
+
+### Future Improvements:
+
+- 🧠 **Use REBEL (Relation Extraction By End-to-End Language generation)**  
+  Leverage [REBEL model](https://huggingface.co/Babelscape/rebel-large) for faster triple extraction for relationships and define types using LangChain.
+
+- 🛠️ **Parallel Processing & Caching**  
+  Use background tasks and intermediate result caching for PDF processing and long texts.
+
+---
