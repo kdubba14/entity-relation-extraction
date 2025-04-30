@@ -43,7 +43,11 @@ async def extract_relationships(text: str, entities: list[MergedEntity], full_te
 
       Text: {text}
 
-      Entities: [{[entity.model_dump_json() for entity in entities]}]
+      Entities: [{[
+        entity.model_dump_json()
+        for entity in entities
+        if entity.text.lower() in text.lower()
+      ]}]
 
       Use the following rules:
 
@@ -95,37 +99,37 @@ async def extract_relationships(text: str, entities: list[MergedEntity], full_te
 
     for entity in entities:
       label = (entity.text or "").lower()
-      if lowered == label: # TODO: use in?
+      if lowered in label:
         return entity.id
     
     return entities[0].id
 
   agent = Agent(
-    'anthropic:claude-3-5-haiku-latest', 
+    'openai:gpt-4o', 
     system_prompt=system_prompt, 
     output_type=str,
     output_retries=2,
-    retries=2
+    retries=2,
   )
   
   print('getting relationship result')
   result = None
   try:
-    result = await agent.run(text, usage_limits=UsageLimits(response_tokens_limit=10000))
+    result = await agent.run(text, usage_limits=UsageLimits(response_tokens_limit=32000))
   except Exception as e:
     print("Error:", e)
 
   relationships: list[Relationship] = []
   try:
-    data = json.loads(result.output)
+    data = json.loads(result.output.replace('```', '').replace('```json', '').replace('json', '', 1).strip())
     for item in data:
       relationship = Relationship(**item)
-      if relationship.confidence >= threshold:
+      relationship.predicate = relationship.predicate.replace(' ', '_')
+      if relationship.confidence >= (threshold or 0.5):
         relationships.append(relationship)
   except Exception as e:
     # TODO: handle retry
     print("Parsing failed:", e)
-    print(result.output)
 
   response: list[Relationship] = [
     Relationship(**{

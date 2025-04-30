@@ -72,7 +72,7 @@ class EntityExtractor(Runnable):
         spacy_chunks = spacy_splitter.split_text(input.text)
 
         llm_splitter = RecursiveCharacterTextSplitter(
-          chunk_size=10000,
+          chunk_size=5000,
           chunk_overlap=500,
           separators=["\n\n", "\n", ".", " ", ""]
         )
@@ -100,7 +100,7 @@ class RelationshipExtractor(Runnable):
     async def invoke(self, context: dict, config=None, **kwargs) -> dict:
         ctx = await context
         relationship_splitter = RecursiveCharacterTextSplitter(
-          chunk_size=10000,
+          chunk_size=5000,
           chunk_overlap=400,
           separators=["\n\n", "\n", ".", " ", ""]
         )
